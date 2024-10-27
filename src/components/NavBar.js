@@ -8,7 +8,7 @@ export class Navbar extends Component {
       
 
     return (
-      <nav className={`navbar navbar-expand-lg navbar-${Mode} bg-${Mode}`}>
+      <nav className={`navbar navbar-expand-lg navbar-${Mode} bg-${Mode} `}>
         <div className="container-fluid">
           {/* Brand */}
           <Link className="navbar-brand" to="/">
@@ -31,12 +31,15 @@ export class Navbar extends Component {
           <div className="collapse navbar-collapse  " id="navbarNav">
             {/* Links */}
             <ul className="navbar-nav me-auto">
-              <li className="nav-item">
+            <li className="nav-item">
+          <Link className="nav-link " aria-current="page" to="/">General</Link>
+        </li>
+              {/* <li className="nav-item">
                 <Link className="nav-link" to="/">Home</Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to="/">General</Link>
-              </li>
+              </li> */}
+              {/* <li className="nav-item">
+                <Link className="nav-link" to="/"></Link>
+              </li> */}
               <li className="nav-item">
                 <Link className="nav-link" to="/Entertainment">Entertainment</Link>
               </li>
