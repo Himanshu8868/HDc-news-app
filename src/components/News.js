@@ -138,7 +138,7 @@ export class News extends Component {
               {articles.map((element, index) => (
                 <div className="col-md-4 mb-4" key={`${element.url}-${index}`}>
                   <NewsItem
-                    title={element.title ? element.title.slice(0, 50):'.....'}
+                    title={element.title ? element.title.slice(0,100):'.....'}
                     description={
                       element.description ? element.description.slice(0, 100) :'..... '
                     }
