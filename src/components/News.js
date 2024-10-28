@@ -1,163 +1,128 @@
-import React, { Component } from 'react';
-import NewsItem from './NewsItem';
+import { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
+import NewsItem from './NewsItem';
 import InfiniteScroll from 'react-infinite-scroll-component';
 
-export class News extends Component {
-  static defaultProps = {
-    country: 'us',
-    pageSize: 12,
-    category: 'science',
-     apikey: ''
-  };
+const News = ({
+  country = 'us',
+  pageSize = 12,
+  category = 'science',
+  setProgress,
+  apikey,
+  headline,
+  mode,
+}) => {
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalResults, setTotalResults] = useState(0);
 
-  static propTypes = {
-    country: PropTypes.string,
-    pageSize: PropTypes.number,
-    category: PropTypes.string,
-    setProgress: PropTypes.func.isRequired, // Ensure this prop is defined as required
-  };
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      articles: [],
-      loading: true,
-      page: 1,
-      totalResults: 0,
-      error: null,
-    };
-  }
-
-  fetchNews = async (page = 1) => {
+  const fetchNews = useCallback(async () => {
     try {
-      const { pageSize, country, category, setProgress } = this.props;
+      setProgress(10);
 
-      setProgress(10); // Start loading bar
-
-      const url = `https://newsapi.org/v2/top-headlines?country=${country}&category=${category}&apikey=${this.props.apikey}&page=${page}&pageSize=${pageSize}`;
-
-      this.setState({ loading: true, error: null });
-
+      const url = `https://newsapi.org/v2/top-headlines?country=${country}&category=${category}&apikey=${apikey}&page=${page}&pageSize=${pageSize}`;
+      
       let data = await fetch(url);
-      setProgress(40); // Update progress
-
+      setProgress(40);
+      
       let parsedData = await data.json();
-      console.log(parsedData);
-    
-      this.setState({
-        articles: parsedData.articles || [],
-        totalResults: parsedData.totalResults,
-        page,
-        loading: false,
-      });
-
-      setProgress(100); // Complete loading
+      setArticles(parsedData.articles);
+      setTotalResults(parsedData.totalResults);
+      setLoading(false);
+      
+      setProgress(100);
     } catch (error) {
       console.error('Error fetching news:', error);
-      this.setState({
-        loading: false,
-        error: 'Failed to fetch news 😫! Check Internet Connection🧐! Or Refresh the Page.'  
-      });
-
-      this.props.setProgress(100); // Complete loading on error
+      setLoading(false);
+      setProgress(100);
     }
-  };
+  }, [country, category, apikey, page, pageSize, setProgress]);
 
-  componentDidMount() {
-    this.fetchNews();
-  }
+  useEffect(() => {
+    fetchNews();
+  }, [fetchNews]); // Now we include fetchNews in the dependencies
 
-  fetchMoreData = async () => {
+  const fetchMoreData = useCallback(async () => {
     try {
-      const { page, articles } = this.state;
-      const { pageSize, country, category, setProgress} = this.props;
-
-      setProgress(10); // Start loading bar
-
-      const url = `https://newsapi.org/v2/top-headlines?country=${country}&category=${category}&apikey=${this.props.apikey}&page=${page + 1}&pageSize=${pageSize}`;
-
+      setProgress(10);
+      
+      const url = `https://newsapi.org/v2/top-headlines?country=${country}&category=${category}&apikey=${apikey}&page=${page + 1}&pageSize=${pageSize}`;
+      
       let data = await fetch(url);
-      setProgress(30); // Update progress
-
+      setProgress(30);
+      
       let parsedData = await data.json();
-      console.log(parsedData);
-    
-      this.setState({
-        articles: articles.concat(parsedData.articles || []),
-        page: page + 1,
-        loading: false,
-      });
-
-      setProgress(100); // Complete loading
+      setArticles((prevArticles) => prevArticles.concat(parsedData.articles || []));
+      setTotalResults(parsedData.totalResults);
+      setPage(page + 1);
+      
+      setProgress(100);
     } catch (error) {
       console.error('Error fetching more data:', error);
-      this.setState({ loading: false, error: 'Failed to fetch more news.' });
-      this.props.setProgress(100); // Complete loading on error
+      setProgress(100);
     }
-  };
+  }, [country, category, apikey, page, pageSize, setProgress]);
 
-  render() {
-    const { articles, loading, error } = this.state;
-    const textColor = this.props.Mode === 'dark' ? 'white' : 'black';
+  const textColor = mode === 'dark' ? 'white' : 'black';
 
-    return (
-      <div className={`container my-3 ${this.props.Mode}`}>
-        <h1 className="text-center mb-5" style={{ color: textColor }}>
-          {this.props.headline}
-        </h1>
+  return (
+    <div className={`container my-3 ${mode}`}>
+      <h1 className="text-center mb-5" style={{ color: textColor }}>
+        {headline}
+      </h1>
 
-        {loading && (
+      {loading && (
+        <div className="d-flex justify-content-center my-4">
+          <button className="btn btn-primary" type="button" disabled>
+            <span className="spinner-grow spinner-grow-sm me-2" aria-hidden="true"></span>
+            Loading...
+          </button>
+        </div>
+      )}
+
+      <InfiniteScroll
+        dataLength={articles.length}
+        next={fetchMoreData}
+        hasMore={articles.length !== totalResults}
+        loader={
           <div className="d-flex justify-content-center my-4">
             <button className="btn btn-primary" type="button" disabled>
               <span className="spinner-grow spinner-grow-sm me-2" aria-hidden="true"></span>
-              Loading...
+              Loading more...
             </button>
           </div>
-        )}
-
-        {error ? (
-          <h2 className="text-center" style={{ color: textColor }}>
-            {error}
-          </h2>
-        ) : (
-          <InfiniteScroll
-            dataLength={articles.length}
-            next={this.fetchMoreData}
-            hasMore={articles.length !== this.state.totalResults}
-            loader={
-              <div className="d-flex justify-content-center my-4">
-                <button className="btn btn-primary" type="button" disabled>
-                  <span className="spinner-grow spinner-grow-sm me-2" aria-hidden="true"></span>
-                  Loading more...
-                </button>
-              </div>
-            }
-          >
-            <div className="row">
-              {articles.map((element, index) => (
-                <div className="col-md-4 mb-4" key={`${element.url}-${index}`}>
-                  <NewsItem
-                    title={element.title ? element.title.slice(0,100):'.....'}
-                    description={
-                      element.description ? element.description.slice(0, 100) :'..... '
-                    }
-                    Imageurl={element.urlToImage}
-                    NewsUrl={element.url}
-                    mode={this.props.Mode}
-                    author={element.author}
-                    date={element.publishedAt}
-                    source={element.source.name}
-                  />
-                </div>
-              ))}
+        }
+      >
+        <div className="row">
+          {articles.map((element, index) => (
+            <div className="col-md-4 mb-4" key={`${element.url}-${index}`}>
+              <NewsItem
+                title={element.title ? element.title.slice(0, 100) : '.....'}
+                description={element.description ? element.description.slice(0, 100) : '.....'}
+                Imageurl={element.urlToImage}
+                NewsUrl={element.url}
+                mode={mode}
+                author={element.author}
+                date={element.publishedAt}
+                source={element.source.name}
+              />
             </div>
-          </InfiniteScroll>
-        )}
-</div>
-    );
-  }
-}
+          ))}
+        </div>
+      </InfiniteScroll>
+    </div>
+  );
+};
 
+News.propTypes = {
+  country: PropTypes.string,
+  pageSize: PropTypes.number,
+  category: PropTypes.string,
+  setProgress: PropTypes.func.isRequired,
+  apikey: PropTypes.string.isRequired,
+  headline: PropTypes.string.isRequired,
+  mode: PropTypes.string.isRequired,
+};
 
 export default News;

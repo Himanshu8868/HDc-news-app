@@ -1,14 +1,11 @@
-import React, { Component } from 'react';
+import React  from 'react';
 import { Link } from 'react-router-dom';
 
-export class Navbar extends Component {
-
-  render() {
-    const { Mode, toggleMode } = this.props;
-      
+const Navbar= (props) => {
+    const { mode, toggleMode } = props;
 
     return (
-      <nav className={`navbar navbar-expand-lg navbar-${Mode} bg-${Mode} `}>
+      <nav className={`navbar navbar-expand-lg navbar-${mode} bg-${mode} `}>
         <div className="container-fluid">
           {/* Brand */}
           <Link className="navbar-brand" to="/">
@@ -57,11 +54,8 @@ export class Navbar extends Component {
               </li>
             </ul>
 
-            
-
-
-            {/* Mode Toggle */}
-            <div className={`form-check form-switch text-${Mode === 'light' ? 'dark' : 'light'} ms-3`}>
+            {/* mode Toggle */}
+            <div className={`form-check form-switch text-${mode === 'light' ? 'dark' : 'light'} ms-3`}>
               <input
                 className="form-check-input"
                 type="checkbox"
@@ -69,14 +63,14 @@ export class Navbar extends Component {
                 onClick={toggleMode}
               />
               <label className="form-check-label" htmlFor="modeSwitch">
-                Dark / Light Mode
+                Dark / Light mode
               </label>
             </div>
           </div>
         </div>
       </nav>
     );
-  }
 }
+
 
 export default Navbar;
