@@ -5,7 +5,7 @@ const Navbar= (props) => {
     const { mode, toggleMode } = props;
 
     return (
-      <nav className={`navbar navbar-expand-lg navbar-${mode} bg-${mode} `}>
+      <nav className={`navbar navbar-expand-lg navbar-${mode} bg-${mode} fixed-top`}>
         <div className="container-fluid">
           {/* Brand */}
           <Link className="navbar-brand" to="/">
